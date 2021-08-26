@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+
+	<style>
+		.slider{
+			max-width: 400px;
+			width: 100%;
+			margin:  100px auto;
+			overflow: hidden;
+			position: relative;
+			display: flex;
+			justify-content: center;
+		}
+		.slider-box{
+		display: flex;
+		position: relative;
+		transition: .5s;
+		right: 0; /*обязательно указать чтобы transition сработал*/
+		border-radius: 1rem;
+		}
+		.dot-box{
+			position: absolute;
+			top: 10px;	
+			display: flex;
+			
+		}
+		span:not(:first-child){			
+			margin-left: 5px;
+		}
+		span{
+			border-radius: 1rem;
+		}
+		img{
+		max-width: 400px;
+		width: 100%;
+		height: 100%;
+		aspect-ratio: 4/3;
+		object-fit: cover;
+		border-radius: 1rem;
+
+		}
+		#next, #prev{
+		width: 50px;
+		height: 50px;
+		margin-left: 10px;
+
+	}
+	.btn-box{
+		width: 120px;
+		margin: 20px auto;
+		display: flex;
+	}
+
+	</style>
+</head>
+<body>
+
+	<div class="slider">
+		<div class="slider-box">
+			<img src="apatity.jpg" alt="">
+			<img src="kap1.jpg" alt="">
+			<img src="murmashi.jpg" alt="">
+			<img src="vladik.jpg" alt="">
+
+			
+		</div>
+		<div class="dot-box"></div>
+	</div>
+
+	<div class="btn-box">
+		<input type="button" id="prev" value = 'Prev'>
+		<input type="button" id="next" value = 'Next'>
+	</div>
+	
+	<script>
+		let slider = document.querySelector('.slider');
+
+		let dotBox = document.querySelector('.dot-box');
+
+		let box = document.querySelector('.slider-box');
+		//box.style.transition = '.5s';
+
+		let imgs = document.querySelectorAll('img');
+		//console.log(imgs[0]);
+
+
+		let next = document.querySelector('#next');
+		next.addEventListener('click', nextImg);
+
+		let prev = document.querySelector('#prev');
+		prev.addEventListener('click', prevImg);
+
+		let position = 0;
+		// вычислим ширину на которую будем сдвигать блок slider-box, это - ширина картинки. причем после ее загрузки
+
+		imgs[0].onload = function(){
+		sdvig = imgs[0].offsetWidth;
+
+		dotGen();	
+		let spans = document.querySelectorAll('span');
+		//console.log(spans)
+		spans[0].style.background = "white";	
+		}
+		
+		let count = 0;
+		
+
+
+
+		function nextImg(){
+			
+			//--- сдвиг картинок
+			if(position >= sdvig*(imgs.length-1)){
+				//если не возвращаться к началу то return
+				return;
+				// если возвращаться , то position = -sdvig;
+				//position = -sdvig;
+				
+			}
+			position += sdvig;
+			box.style.right = position +'px';
+
+			//--- покраска спанов
+			spans = document.querySelectorAll('span');
+			for(i =0; i < spans.length; i++){
+				spans[i].style.background = "grey";
+			}
+			if(count >= spans.length - 1){
+				count = 0;
+				spans[count].style.background = "white";
+				return;
+			}
+			count++;
+			spans[count].style.background = "white";			
+			//--- покраска спанов
+
+		}
+
+		function prevImg(){
+
+			if(position <= 0){
+				return;
+				//position = sdvig*(imgs.length);
+			}
+			position -= sdvig;			
+			box.style.right = position +'px';
+
+			//--- покраска спанов
+			spans = document.querySelectorAll('span');
+			for(i =0; i < spans.length; i++){
+				spans[i].style.background = "grey";
+			}
+			if(count <= 0){
+				count = spans.length;
+			}
+			count--;			
+			spans[count].style.background = "white";
+			//--- покраска спанов
+			
+		}
+
+
+		// сгенерируем доты
+		function dotGen(){
+			for(i = 0; i < imgs.length; i++){
+			let span = document.createElement('span');
+			dotBox.append(span);
+			span.style.background = 'grey';
+			
+			span.style.height = '5px';
+			//span.style.marginLeft = '5px';
+			span.style.width = ((sdvig / imgs.length) - (window.getComputedStyle(span, null).getPropertyValue("margin-left").replace("px", ''))*2) + 'px';
+			
+			}
+			
+		}
+
+		// --- добавим свайп ---------
+		slider.addEventListener('touchstart', handleTouchStart, false);
+		slider.addEventListener('touchmove', handleTouchMove, false);
+
+		function handleTouchStart(event){
+			// координалы тычка пальцем						
+			x1 = event.touches[0].clientX;
+			y1 = event.touches[0].clientY;
+			
+			flag = false; //чтобы ф-я выполнялась один раз
+			
+		}
+
+		function handleTouchMove(event){
+							
+			if(!x1 || !y1){
+				return;
+			}
+			x2 = event.touches[0].clientX;
+			y2 = event.touches[0].clientY;
+			// 
+			if(x2 < x1 && Math.abs(y1 - y2) <7){				
+				if(!flag){  //чтобы ф-я выполнялась один раз за тычок
+					nextImg();
+					flag = true;
+				}
+				
+			}
+			if(x2 > x1 && Math.abs(y1 - y2) <7){
+				if(!flag){	//чтобы ф-я выполнялась один раз за тычок
+					prevImg();
+					flag = true;
+				}
+			}
+		}
+
+
+
+
+
+		// Это код по принципу замены первого элемента массива
+
+		// let count = 0;
+		// let img = imgs[0].src;
+
+		// function nextImg(){
+
+		// 	if(count < imgs.length-1){
+		// 		count++;
+		// 		console.log(count)
+		// 		imgs[0].src = imgs[count].src;
+		// 	}
+		// 	else{
+		// 		count = 0;
+		// 		imgs[0].src = img;
+		// 	}
+			
+
+		// }
+
+		// function prevImg(){
+			
+		// }
+
+	</script>
+</body>
+</html>
